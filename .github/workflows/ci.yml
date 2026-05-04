@@ -26,8 +26,10 @@ jobs:
 
       - name: Compile and run smoke tests
         shell: pwsh
+        env:
+          JAVA_TOOL_OPTIONS: -Djava.awt.headless=true
         run: |
           New-Item -ItemType Directory -Force out | Out-Null
           $sourceFiles = Get-ChildItem -Path src, tests -Recurse -Filter *.java | Select-Object -ExpandProperty FullName
           javac --release 22 -d out $sourceFiles
-          java -Djava.awt.headless=true -cp out ci.SmokeTests
+          java -cp out ci.SmokeTests
