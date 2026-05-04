@@ -25,7 +25,7 @@ public class Settings {
                 return values;
             }
         } catch (IOException | NumberFormatException e) {
-            e.printStackTrace();
+            return new String[] { DEFAULT_FONT_NAME, DEFAULT_FONT_STYLE, DEFAULT_FONT_SIZE };
         }
 
         return new String[] { DEFAULT_FONT_NAME, DEFAULT_FONT_STYLE, DEFAULT_FONT_SIZE };

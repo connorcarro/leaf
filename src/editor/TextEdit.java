@@ -5,7 +5,6 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -30,7 +29,6 @@ import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.filechooser.FileSystemView;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
@@ -54,6 +52,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.FileDialog;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Toolkit;
@@ -93,10 +92,8 @@ public final class TextEdit extends JFrame implements ActionListener {
     private static JScrollPane scroll;
     private static JTextPane area;
     private static JFrame frame;
-    private static int returnValue = 0;
     private static Boolean saved = true;
     private static String ingest = "";
-    private static JFileChooser jfc;
     private static String saved_file = null;
     private static String current_name = "Untitled";
     private static UndoManager manager;
@@ -139,6 +136,12 @@ public final class TextEdit extends JFrame implements ActionListener {
 
     public TextEdit() { 
         run();
+    }
+
+    static void disposeForStartupTest() {
+        if (frame != null) {
+            frame.dispose();
+        }
     }
 
     private int findLastNonWordChar(String text, int index) {
@@ -282,7 +285,7 @@ public final class TextEdit extends JFrame implements ActionListener {
         
         // AttributeSet attrWhite = cont.addAttribute(cont.getEmptySet(), StyleConstants.Foreground, new Color(255, 255, 255));
         try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
         //     UIManager.LookAndFeelInfo[] looks = UIManager.getInstalledLookAndFeels();
         // for (UIManager.LookAndFeelInfo look : looks) {
         //     System.out.println(look.getClassName());
@@ -517,14 +520,7 @@ public final class TextEdit extends JFrame implements ActionListener {
         menu_main.add(menu_format);
         
 
-        // Initialize JFileChooser
-        //TODO: Change JFileChooser to FileDialog
         Settings settings = new Settings();
-        jfc = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
-        jfc.setDialogTitle("Save As");
-        jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-        // FileDialog fd = new FileDialog(frame, "Title");
-        // fd.show();
             frame.setJMenuBar(menu_main);
             updateTitle();
             area.setFont(new Font(settings.getFont("Font Name"), Integer.parseInt(settings.getFont("Font Style")), Integer.parseInt(settings.getFont("Font Size"))));
@@ -977,13 +973,13 @@ public final class TextEdit extends JFrame implements ActionListener {
     }
 
     public boolean SaveAs() {
-        returnValue = jfc.showSaveDialog(null);
-        if (returnValue != JFileChooser.APPROVE_OPTION || jfc.getSelectedFile() == null) {
+        File selectedFile = chooseFile(FileDialog.SAVE);
+        if (selectedFile == null) {
             return false;
         }
 
         try {
-            File f = jfc.getSelectedFile();
+            File f = selectedFile;
             saved_file = f.toString();
             FileWriter out = new FileWriter(f);
             out.write(area.getText());
@@ -1003,6 +999,24 @@ public final class TextEdit extends JFrame implements ActionListener {
         return false;
     }
 
+    private File chooseFile(int mode) {
+        FileDialog dialog = new FileDialog(frame, mode == FileDialog.SAVE ? "Save As" : "Open", mode);
+        if (saved_file != null) {
+            File currentFile = new File(saved_file);
+            dialog.setDirectory(currentFile.getParent());
+            dialog.setFile(currentFile.getName());
+        } else {
+            dialog.setDirectory(System.getProperty("user.home", "."));
+        }
+
+        dialog.setVisible(true);
+        if (dialog.getFile() == null) {
+            return null;
+        }
+
+        return new File(dialog.getDirectory(), dialog.getFile());
+    }
+
     private boolean saveCurrentDocument() {
         if (saved_file == null) {
             return SaveAs();
@@ -1015,8 +1029,7 @@ public final class TextEdit extends JFrame implements ActionListener {
             // New
             Object[] options = { "Save", "Don't Save", "Cancel" };
 
-            // int File_Not_Saved = JOptionPane.showConfirmDialog(jfc, "Current file not saved.", "File Not Saved", );
-            int File_Not_Saved = JOptionPane.showOptionDialog(jfc,
+            int File_Not_Saved = JOptionPane.showOptionDialog(frame,
             "Current file is not saved.", "File Not Saved",
             JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null,
             options, options[1]);
@@ -1043,8 +1056,7 @@ public final class TextEdit extends JFrame implements ActionListener {
             //Open
             Object[] options = { "Save", "Don't Save", "Cancel" };
 
-            // int File_Not_Saved = JOptionPane.showConfirmDialog(jfc, "Current file not saved.", "File Not Saved", );
-            int File_Not_Saved = JOptionPane.showOptionDialog(jfc,
+            int File_Not_Saved = JOptionPane.showOptionDialog(frame,
             "Current file is not saved.", "File Not Saved",
             JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null,
             options, options[1]);
@@ -1065,8 +1077,7 @@ public final class TextEdit extends JFrame implements ActionListener {
             //Exit
             Object[] options = { "Save", "Don't Save", "Cancel" };
 
-            // int File_Not_Saved = JOptionPane.showConfirmDialog(jfc, "Current file not saved.", "File Not Saved", );
-            int File_Not_Saved = JOptionPane.showOptionDialog(jfc,
+            int File_Not_Saved = JOptionPane.showOptionDialog(frame,
             "Current file is not saved.", "File Not Saved",
             JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null,
             options, options[1]);
@@ -1085,30 +1096,6 @@ public final class TextEdit extends JFrame implements ActionListener {
             }
         }
     }
-
-    // private void Open() {
-    //     returnValue = jfc.showOpenDialog(null);
-
-    //         fileRoot = new File(jfc.getSelectedFile().getAbsolutePath()).toPath();
-    //         if (returnValue == JFileChooser.APPROVE_OPTION) {
-    //             ingest = "";
-    //             File f = new File(jfc.getSelectedFile().getAbsolutePath());
-    //             try {
-    //                 FileReader read = new FileReader(f);
-
-    //                 Scanner scan = new Scanner(read);
-    //                 while (scan.hasNextLine()) {
-    //                     String line = scan.nextLine() + "\n";
-    //                     ingest = ingest + line;
-    //                 }
-    //                 area.setText(ingest);
-    //                 current_name = f.getName();
-    //                 saved_file = f.toString();
-    //                 saved = true;
-    //                 scan.close();
-    //             } catch ( FileNotFoundException ex) { ex.printStackTrace(); }
-    //         }
-    // }
 
     private void updateTitle() {
         new Thread (() -> {
@@ -1147,11 +1134,9 @@ public final class TextEdit extends JFrame implements ActionListener {
                     Request_Save(ae);
                 }
                 if(saved) {
-                    returnValue = jfc.showOpenDialog(null);
-                    if(returnValue == JFileChooser.APPROVE_OPTION) {
-
-                        updateFileManager(jfc.getSelectedFile().toPath());
-                        break;
+                    File selectedFile = chooseFile(FileDialog.LOAD);
+                    if(selectedFile != null) {
+                        updateFileManager(selectedFile.toPath());
                     }
                 }
                 break;

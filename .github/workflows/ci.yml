@@ -43,3 +43,33 @@ jobs:
           $env:JAVA_TOOL_OPTIONS = "$env:JAVA_TOOL_OPTIONS -Dleaf.config.dir=$configDir"
           java -cp out editor.Main --self-test
           java -cp out ci.SmokeTests
+
+  gui-startup-test:
+    name: GUI startup smoke test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '22'
+
+      - name: Install virtual display
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb
+
+      - name: Compile app
+        run: |
+          mkdir -p out
+          javac --release 22 -Xlint:deprecation -d out $(find src -name "*.java")
+
+      - name: Start app under virtual display
+        env:
+          JAVA_TOOL_OPTIONS: -Dleaf.config.dir=${{ runner.temp }}/leaf-config
+        run: |
+          xvfb-run -a java -cp out editor.Main --startup-test

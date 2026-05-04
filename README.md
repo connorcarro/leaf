@@ -51,7 +51,7 @@ Leaf is in no way a production-ready editor, or anything near it. It is an old l
 - Highlight common Java keywords while editing in Java mode.
 - Use start/end selection for selecting text between two caret positions.
 - Use column selection mode for rectangular text selections.
-- Use the host operating system look and feel through Swing.
+- Use Swing's cross-platform look and feel.
 
 ## Requirements
 
@@ -229,6 +229,12 @@ java -cp out editor.Main --self-test
 java -cp out ci.SmokeTests
 ```
 
+To check that the GUI startup path constructs successfully, run this from a desktop session:
+
+```sh
+java -cp out editor.Main --startup-test
+```
+
 Development notes:
 
 - Keep source files under `src`.
@@ -246,7 +252,7 @@ git tag v1.0.0
 git push origin v1.0.0
 ```
 
-The release workflow compiles the app, runs the smoke tests, packages `leaf.jar`, verifies `java -jar leaf.jar --self-test`, and attaches the JAR to the GitHub release.
+The release workflow compiles the app, runs the smoke tests, packages `leaf.jar`, verifies `java -jar leaf.jar --self-test`, runs `java -jar leaf.jar --startup-test` under a virtual display, and attaches the JAR to the GitHub release.
 
 ## Project Structure
 

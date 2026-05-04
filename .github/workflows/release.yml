@@ -48,6 +48,17 @@ jobs:
           jar --create --file leaf.jar --main-class editor.Main -C build/classes .
           java -jar leaf.jar --self-test
 
+      - name: Install virtual display
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb
+
+      - name: Run release jar startup smoke test
+        env:
+          JAVA_TOOL_OPTIONS: -Dleaf.config.dir=${{ runner.temp }}/leaf-config
+        run: |
+          xvfb-run -a java -jar leaf.jar --startup-test
+
       - name: Upload jar artifact
         uses: actions/upload-artifact@v4
         with:
