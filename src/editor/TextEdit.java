@@ -100,6 +100,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.Locale;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 public final class TextEdit extends JFrame implements ActionListener {
@@ -887,15 +889,19 @@ public final class TextEdit extends JFrame implements ActionListener {
                         Request_Save("Open");
                     }
                     if(saved) {
-                        String selectedPath = jfc.getSelectedFile().getParent() + "\\";
+                        Path selectedPath = fileRoot;
+                        if (tree.getSelectionPath() == null) {
+                            return;
+                        }
                         Object[] paths = tree.getSelectionPath().getPath();
-                        for (int i = 0; i < paths.length; i++) {
-                            selectedPath += paths[i];
+                        for (int i = 1; i < paths.length; i++) {
+                            String part = paths[i].toString();
+                            selectedPath = selectedPath.resolve(part);
                             if (i + 1 < paths.length) {
-                                selectedPath += File.separator;
-                                // System.out.println(paths[i+1].toString().substring(paths[i+1].toString().indexOf(".")));
-                                if (paths[i+1].toString().contains(".")) {
-                                    String end = paths[i+1].toString().substring(paths[i+1].toString().indexOf("."));
+                                String nextPart = paths[i + 1].toString();
+                                int dotIndex = nextPart.lastIndexOf('.');
+                                if (dotIndex >= 0) {
+                                    String end = nextPart.substring(dotIndex).toLowerCase(Locale.ROOT);
                                     if(end.equals(".jpg") || end.equals(".gif")) {
                                         valid = false;
                                     }
@@ -903,7 +909,7 @@ public final class TextEdit extends JFrame implements ActionListener {
                             }
                         }
                         if(valid) {
-                            OpenFile(new File(selectedPath));
+                            OpenFile(selectedPath.toFile());
                         }
                     }
 
@@ -1336,13 +1342,15 @@ public final class TextEdit extends JFrame implements ActionListener {
                     }
 
                     private void saveFontSettings(String fontName, String fontStyle, int fontSize) {
-                        File f = new File("src\\editor\\settings_data.txt");
+                        Path settingsPath = Path.of("src", "editor", "settings_data.txt");
                         try {
-                            PrintWriter out = new PrintWriter(new FileOutputStream(f), false);
+                            PrintWriter out = new PrintWriter(Files.newBufferedWriter(settingsPath));
                             out.write(fontName + "," + fontStyle.toUpperCase() + "," + fontSize);
                             out.close();
                         } catch (FileNotFoundException e) {
                             // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        } catch (IOException e) {
                             e.printStackTrace();
                         }
                     }

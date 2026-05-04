@@ -2,13 +2,13 @@ package editor;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Arrays;
 import java.util.Scanner;
+import java.nio.file.Path;
 
 public class Settings {
 
     private String[] fetch() {
-        File f = new File("..\\src\\editor\\settings_data.txt");
+        File f = Path.of("src", "editor", "settings_data.txt").toFile();
         String text = "";
         try {
             Scanner sc = new Scanner(f);

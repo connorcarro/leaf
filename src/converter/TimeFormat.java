@@ -8,11 +8,17 @@ public class TimeFormat {
 
     public String convert(int h, int m) {
         String result = "";
-        String prefix = "";
         String suffix = "";
-        if(h < 12) {
-            prefix = "";
+        String prefix = "";
+        if(h == 0) {
+            h = 12;
             suffix = " AM";
+            result = prefix + h + ":" + m + suffix;
+        } else if(h < 12) {
+            suffix = " AM";
+            result = prefix + h + ":" + m + suffix;
+        } else if (h == 12) {
+            suffix = " PM";
             result = prefix + h + ":" + m + suffix;
         } else if (h > 12) {
             prefix = "0";
