@@ -24,12 +24,15 @@ jobs:
           distribution: temurin
           java-version: '22'
 
-      - name: Compile and run smoke tests
+      - name: Compile and run feature smoke tests
         shell: pwsh
         env:
           JAVA_TOOL_OPTIONS: -Djava.awt.headless=true
         run: |
           New-Item -ItemType Directory -Force out | Out-Null
           $sourceFiles = Get-ChildItem -Path src, tests -Recurse -Filter *.java | Select-Object -ExpandProperty FullName
-          javac --release 22 -d out $sourceFiles
+          javac --release 22 -Xlint:deprecation -d out $sourceFiles
+          $configDir = Join-Path $env:RUNNER_TEMP "leaf-config"
+          $env:JAVA_TOOL_OPTIONS = "$env:JAVA_TOOL_OPTIONS -Dleaf.config.dir=$configDir"
+          java -cp out editor.Main --self-test
           java -cp out ci.SmokeTests

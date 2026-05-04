@@ -5,11 +5,18 @@ import converter.MonthConverter;
 import converter.TimeFormat;
 import editor.Settings;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import javax.swing.JTextPane;
+import javax.swing.JTextField;
+import javax.swing.text.BadLocationException;
 import javax.swing.tree.DefaultMutableTreeNode;
 import treeNodes.CreateChildNodes;
 import treeNodes.FileNode;
+import editor.ColumnSelectCaret;
+import editor.Find;
 
 public final class SmokeTests {
     private static int failures = 0;
@@ -19,6 +26,8 @@ public final class SmokeTests {
         testSettings();
         testTreeBuilder();
         testFileNode();
+        testFindAndReplace();
+        testColumnCaret();
 
         if (failures > 0) {
             throw new AssertionError(failures + " smoke test(s) failed");
@@ -42,10 +51,10 @@ public final class SmokeTests {
     }
 
     private static void testSettings() throws IOException {
-        Path configDir = Files.createTempDirectory("text-editor-config");
-        String oldConfigDir = System.getProperty("texteditor.config.dir");
+        Path configDir = Files.createTempDirectory("leaf-config");
+        String oldConfigDir = System.getProperty("leaf.config.dir");
         try {
-            System.setProperty("texteditor.config.dir", configDir.toString());
+            System.setProperty("leaf.config.dir", configDir.toString());
             Settings settings = new Settings();
             check("Default font name loads", "Consolas".equals(settings.getFont("Font Name")));
             check("Default font style loads", "0".equals(settings.getFont("Font Style")));
@@ -57,16 +66,16 @@ public final class SmokeTests {
             check("Saved font size loads", "20".equals(settings.getFont("Font Size")));
         } finally {
             if (oldConfigDir == null) {
-                System.clearProperty("texteditor.config.dir");
+                System.clearProperty("leaf.config.dir");
             } else {
-                System.setProperty("texteditor.config.dir", oldConfigDir);
+                System.setProperty("leaf.config.dir", oldConfigDir);
             }
             deleteRecursively(configDir);
         }
     }
 
     private static void testTreeBuilder() throws IOException {
-        Path tempDir = Files.createTempDirectory("text-editor-tree");
+        Path tempDir = Files.createTempDirectory("leaf-tree");
         try {
             Path childDir = Files.createDirectory(tempDir.resolve("child"));
             Files.write(childDir.resolve("nested.txt"), new byte[] { 'h', 'i' });
@@ -83,13 +92,57 @@ public final class SmokeTests {
     }
 
     private static void testFileNode() throws IOException {
-        Path tempFile = Files.createTempFile("text-editor-file", ".txt");
+        Path tempFile = Files.createTempFile("leaf-file", ".txt");
         try {
             FileNode node = new FileNode(tempFile.toFile());
             check("FileNode returns file name", tempFile.getFileName().toString().equals(node.toString()));
         } finally {
             Files.deleteIfExists(tempFile);
         }
+    }
+
+    private static void testFindAndReplace() throws Exception {
+        JTextPane area = new JTextPane();
+        area.setText("alpha beta alpha");
+
+        Find find = new Find(area);
+        setField(find, "jtf_find", new JTextField("alpha"));
+        setField(find, "jtf_replace", new JTextField("gamma"));
+
+        invoke(find, "findNext");
+        check("Find selects first match", area.getSelectionStart() == 0 && area.getSelectionEnd() == 5);
+
+        invoke(find, "replaceText");
+        check("Replace updates selected text", "gamma beta alpha".equals(area.getText()));
+
+        invoke(find, "findNext");
+        check("Find advances to next match", "alpha".equals(area.getSelectedText()));
+    }
+
+    private static void testColumnCaret() throws BadLocationException {
+        JTextPane pane = new JTextPane();
+        pane.setText("first\nsecond");
+        ColumnSelectCaret caret = new ColumnSelectCaret();
+        pane.setCaret(caret);
+
+        check("Column selection starts empty", caret.selectionEmpty(pane));
+        pane.getHighlighter().addHighlight(0, 5, javax.swing.text.DefaultHighlighter.DefaultPainter);
+        check("Column selection detects highlight", !caret.selectionEmpty(pane));
+
+        caret.removeText(pane);
+        check("Column selection remove deletes text", "\nsecond".equals(pane.getText()));
+    }
+
+    private static void setField(Object target, String fieldName, Object value) throws Exception {
+        Field field = target.getClass().getDeclaredField(fieldName);
+        field.setAccessible(true);
+        field.set(target, value);
+    }
+
+    private static void invoke(Object target, String methodName) throws Exception {
+        Method method = target.getClass().getDeclaredMethod(methodName);
+        method.setAccessible(true);
+        method.invoke(target);
     }
 
     private static void deleteRecursively(Path root) throws IOException {

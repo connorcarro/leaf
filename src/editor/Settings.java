@@ -7,7 +7,7 @@ import java.nio.file.Path;
 import java.util.Locale;
 
 public class Settings {
-    private static final String CONFIG_DIR_PROPERTY = "texteditor.config.dir";
+    private static final String CONFIG_DIR_PROPERTY = "leaf.config.dir";
     private static final String DEFAULT_FONT_NAME = "Consolas";
     private static final String DEFAULT_FONT_STYLE = "PLAIN";
     private static final String DEFAULT_FONT_SIZE = "18";
@@ -87,19 +87,19 @@ public class Settings {
         if (os.contains("win")) {
             String appData = System.getenv("APPDATA");
             if (appData != null && !appData.isBlank()) {
-                return Path.of(appData, "TextEditor");
+                return Path.of(appData, "Leaf");
             }
         }
 
         if (os.contains("mac")) {
-            return Path.of(System.getProperty("user.home"), "Library", "Application Support", "TextEditor");
+            return Path.of(System.getProperty("user.home"), "Library", "Application Support", "Leaf");
         }
 
         String xdgConfigHome = System.getenv("XDG_CONFIG_HOME");
         if (xdgConfigHome != null && !xdgConfigHome.isBlank()) {
-            return Path.of(xdgConfigHome, "text-editor");
+            return Path.of(xdgConfigHome, "leaf");
         }
 
-        return Path.of(System.getProperty("user.home"), ".config", "text-editor");
+        return Path.of(System.getProperty("user.home"), ".config", "leaf");
     }
 }
