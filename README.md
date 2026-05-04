@@ -12,9 +12,7 @@
 
 Leaf is a lightweight desktop text editor built with Java Swing. It includes the everyday editing tools expected from a local text editor, plus extras such as a file manager tree, find and replace, date/time insertion, font preferences, line and column status, column selection, and basic Java keyword highlighting.
 
-Repository: [connorcarro/text-editor](https://github.com/connorcarro/text-editor)
-
-I originally made Leaf about four years ago while learning Java. Building a real desktop editor was a practical way to learn Swing, file I/O, event handling, user preferences, text documents, and cross-platform behavior.
+I originally made Leaf about four years ago while learning Java and never put it on GitHub. Building a real desktop editor was a practical way to learn Swing, file I/O, event handling, user preferences, text documents, and cross-platform behavior.
 
 ## Contents
 
@@ -78,8 +76,8 @@ Leaf currently runs from source. Clone the repository, compile the Java files in
 ### 1. Clone The Repository
 
 ```sh
-git clone https://github.com/connorcarro/text-editor.git
-cd text-editor
+git clone https://github.com/connorcarro/leaf.git
+cd leaf
 ```
 
 If you downloaded the ZIP from GitHub instead, extract it and open a terminal in the extracted project folder.
