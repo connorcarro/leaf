@@ -273,4 +273,4 @@ The file tree is populated from the selected path. Open a file first, then enabl
 
 ## License
 
-Leaf is released under the MIT License.
+Leaf is released under the MIT License. See [LICENSE](LICENSE).
