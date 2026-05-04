@@ -33,6 +33,9 @@ jobs:
         env:
           JAVA_TOOL_OPTIONS: -Djava.awt.headless=true
         run: |
+          $ErrorActionPreference = 'Stop'
+          $PSNativeCommandUseErrorActionPreference = $true
+
           New-Item -ItemType Directory -Force out | Out-Null
           $sourceFiles = Get-ChildItem -Path src, tests -Recurse -Filter *.java | Select-Object -ExpandProperty FullName
           javac --release 22 -Xlint:deprecation -d out $sourceFiles

@@ -10,9 +10,11 @@
 
 <h1 align="center">Leaf</h1>
 
-Leaf is a lightweight desktop text editor built with Java Swing. It includes the everyday editing tools expected from a local text editor, plus extras such as a file manager tree, find and replace, date/time insertion, font preferences, line and column status, column selection, and basic Java keyword highlighting.
+Leaf is a lightweight desktop text editor built with Java Swing. It has basic local editing features such as opening and saving files, find and replace, date/time insertion, font preferences, line and column status, column selection, a file manager tree, and simple Java keyword highlighting.
 
-I originally made Leaf about four years ago while learning Java and never put it on GitHub. Building a real desktop editor was a practical way to learn Swing, file I/O, event handling, user preferences, text documents, and cross-platform behavior.
+I originally made Leaf years ago while learning Java and left it sitting outside GitHub for a long time. Building a desktop editor was a practical way to learn Swing, file I/O, event handling, user preferences, text documents, and cross-platform behavior.
+
+Leaf is in no way a production-ready editor, or anything near it. It is an old learning project that has been cleaned up enough to build, run, test, and share publicly.
 
 ## Contents
 
@@ -23,6 +25,7 @@ I originally made Leaf about four years ago while learning Java and never put it
 - [Controls](#controls)
 - [How It Works](#how-it-works)
 - [Development](#development)
+- [Releases](#releases)
 - [Project Structure](#project-structure)
 - [Troubleshooting](#troubleshooting)
 - [License](#license)
@@ -54,7 +57,7 @@ I originally made Leaf about four years ago while learning Java and never put it
 
 - Java 22 or newer.
 - A desktop operating system with a graphical environment.
-- A terminal or command prompt for compiling and launching from source.
+- A terminal or command prompt for launching the release JAR or compiling from source.
 
 Leaf is a Swing desktop application, so it needs a GUI session to run normally. Headless environments can compile the project and run self-checks, but they cannot display the editor window.
 
@@ -71,9 +74,19 @@ Both commands should resolve to Java 22 or newer. If your system has multiple Ja
 
 ## Installation
 
-Leaf currently runs from source. Clone the repository, compile the Java files into an `out` directory, then launch the main class.
+The easiest way to run Leaf is to download the release JAR. You can also clone the repository, compile the Java files into an `out` directory, then launch the main class.
 
-### 1. Clone The Repository
+### Option 1: Run The Release JAR
+
+Download `leaf.jar` from the [latest GitHub release](https://github.com/connorcarro/leaf/releases/latest), then run:
+
+```sh
+java -jar leaf.jar
+```
+
+### Option 2: Build From Source
+
+#### 1. Clone The Repository
 
 ```sh
 git clone https://github.com/connorcarro/leaf.git
@@ -82,16 +95,16 @@ cd leaf
 
 If you downloaded the ZIP from GitHub instead, extract it and open a terminal in the extracted project folder.
 
-### 2. Compile
+#### 2. Compile
 
-#### macOS / Linux
+##### macOS / Linux
 
 ```sh
 mkdir -p out
 javac --release 22 -d out $(find src -name "*.java")
 ```
 
-#### Windows PowerShell
+##### Windows PowerShell
 
 ```powershell
 New-Item -ItemType Directory -Force out | Out-Null
@@ -99,15 +112,15 @@ $sourceFiles = Get-ChildItem -Path src -Recurse -Filter *.java | Select-Object -
 javac --release 22 -d out $sourceFiles
 ```
 
-### 3. Run
+#### 3. Run
 
-#### macOS / Linux
+##### macOS / Linux
 
 ```sh
 java -cp out editor.Main
 ```
 
-#### Windows PowerShell
+##### Windows PowerShell
 
 ```powershell
 java -cp out editor.Main
@@ -220,9 +233,20 @@ Development notes:
 
 - Keep source files under `src`.
 - Keep test-only checks under `tests`.
-- Do not commit compiled `.class` files or the generated `out` directory.
+- Do not commit compiled `.class` files or generated `out` / `build` directories.
 - Use Java 22-compatible APIs when editing Swing text components.
 - Keep user settings outside the source tree.
+
+## Releases
+
+GitHub Actions builds the runnable `leaf.jar` release artifact. To publish a release, push a version tag:
+
+```sh
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+The release workflow compiles the app, runs the smoke tests, packages `leaf.jar`, verifies `java -jar leaf.jar --self-test`, and attaches the JAR to the GitHub release.
 
 ## Project Structure
 
