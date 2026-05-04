@@ -2,8 +2,10 @@ package editor;
 
 import java.awt.Font;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Locale;
 
 public class Settings {
@@ -19,7 +21,7 @@ public class Settings {
                 saveFontSettings(DEFAULT_FONT_NAME, DEFAULT_FONT_STYLE, Integer.parseInt(DEFAULT_FONT_SIZE));
             }
 
-            String text = Files.readString(settingsPath).trim();
+            String text = new String(Files.readAllBytes(settingsPath), StandardCharsets.UTF_8).trim();
             String[] values = text.split(",");
             if (values.length == 3 && isValidFontSize(values[2])) {
                 return values;
@@ -57,7 +59,7 @@ public class Settings {
     public void saveFontSettings(String fontName, String fontStyle, int fontSize) throws IOException {
         Path settingsPath = getSettingsPath();
         Files.createDirectories(settingsPath.getParent());
-        Files.writeString(settingsPath, fontName + "," + fontStyle.toUpperCase(Locale.ROOT) + "," + fontSize);
+        Files.write(settingsPath, (fontName + "," + fontStyle.toUpperCase(Locale.ROOT) + "," + fontSize).getBytes(StandardCharsets.UTF_8));
     }
 
     private int fontStyleFromName(String fontStyle) {
@@ -75,8 +77,8 @@ public class Settings {
 
     private Path getSettingsPath() {
         String overrideDir = System.getProperty(CONFIG_DIR_PROPERTY);
-        if (overrideDir != null && !overrideDir.isBlank()) {
-            return Path.of(overrideDir, "settings_data.txt");
+        if (overrideDir != null && !overrideDir.trim().isEmpty()) {
+            return Paths.get(overrideDir, "settings_data.txt");
         }
 
         return getConfigDirectory().resolve("settings_data.txt");
@@ -86,20 +88,20 @@ public class Settings {
         String os = System.getProperty("os.name", "").toLowerCase(Locale.ROOT);
         if (os.contains("win")) {
             String appData = System.getenv("APPDATA");
-            if (appData != null && !appData.isBlank()) {
-                return Path.of(appData, "Leaf");
+            if (appData != null && !appData.trim().isEmpty()) {
+                return Paths.get(appData, "Leaf");
             }
         }
 
         if (os.contains("mac")) {
-            return Path.of(System.getProperty("user.home"), "Library", "Application Support", "Leaf");
+            return Paths.get(System.getProperty("user.home"), "Library", "Application Support", "Leaf");
         }
 
         String xdgConfigHome = System.getenv("XDG_CONFIG_HOME");
-        if (xdgConfigHome != null && !xdgConfigHome.isBlank()) {
-            return Path.of(xdgConfigHome, "leaf");
+        if (xdgConfigHome != null && !xdgConfigHome.trim().isEmpty()) {
+            return Paths.get(xdgConfigHome, "leaf");
         }
 
-        return Path.of(System.getProperty("user.home"), ".config", "leaf");
+        return Paths.get(System.getProperty("user.home"), ".config", "leaf");
     }
 }

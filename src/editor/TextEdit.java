@@ -695,8 +695,8 @@ public final class TextEdit extends JFrame implements ActionListener {
                             for(int i = 0; i < text.length(); i++) {
                                 String c = text.substring(i, i + 1);
                                 
-                                if (c.equals("\s") || c.equals("\t")) {
-                                    char type = text.charAt(i) == '\s' ? '\s' : '\t';
+                                if (c.equals(" ") || c.equals("\t")) {
+                                    char type = text.charAt(i) == ' ' ? ' ' : '\t';
                                     SPACE_AMOUNT += type;
                                 } else {
                                     break;

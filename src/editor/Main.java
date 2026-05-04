@@ -6,7 +6,7 @@ public class Main {
     public static void main(String[] args) throws Exception {
         if (args.length > 0 && "--self-test".equals(args[0])) {
             Settings settings = new Settings();
-            if (settings.getFont("Font Name").isBlank() || new converter.TimeFormat().format("short").isBlank()) {
+            if (settings.getFont("Font Name").trim().isEmpty() || new converter.TimeFormat().format("short").trim().isEmpty()) {
                 throw new IllegalStateException("Application self-test failed.");
             }
             System.out.println("Application self-test passed.");

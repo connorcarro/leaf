@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Java-22-2f6f5e?style=for-the-badge" alt="Java 22">
+  <img src="https://img.shields.io/badge/Java-8%2B-2f6f5e?style=for-the-badge" alt="Java 8+">
   <img src="https://img.shields.io/badge/UI-Swing-daa84f?style=for-the-badge" alt="Swing UI">
   <img src="https://img.shields.io/badge/Platforms-Windows%20%7C%20macOS%20%7C%20Linux-31493f?style=for-the-badge" alt="Windows, macOS, and Linux">
 </p>
@@ -55,7 +55,7 @@ Leaf is in no way a production-ready editor, or anything near it. It is an old l
 
 ## Requirements
 
-- Java 22 or newer.
+- Java 8 or newer.
 - A desktop operating system with a graphical environment.
 - A terminal or command prompt for launching the release JAR or compiling from source.
 
@@ -70,7 +70,7 @@ java -version
 javac -version
 ```
 
-Both commands should resolve to Java 22 or newer. If your system has multiple Java versions installed, make sure `java` and `javac` point to the same modern JDK.
+Both commands should resolve to Java 8 or newer. If your system has multiple Java versions installed, make sure `java` and `javac` point to the same JDK when building from source.
 
 ## Installation
 
@@ -101,7 +101,7 @@ If you downloaded the ZIP from GitHub instead, extract it and open a terminal in
 
 ```sh
 mkdir -p out
-javac --release 22 -d out $(find src -name "*.java")
+javac -source 8 -target 8 -d out $(find src -name "*.java")
 ```
 
 ##### Windows PowerShell
@@ -109,7 +109,7 @@ javac --release 22 -d out $(find src -name "*.java")
 ```powershell
 New-Item -ItemType Directory -Force out | Out-Null
 $sourceFiles = Get-ChildItem -Path src -Recurse -Filter *.java | Select-Object -ExpandProperty FullName
-javac --release 22 -d out $sourceFiles
+javac -source 8 -target 8 -d out $sourceFiles
 ```
 
 #### 3. Run
@@ -134,7 +134,7 @@ The repository includes smoke tests for the core non-visual behavior.
 
 ```sh
 mkdir -p out
-javac --release 22 -d out $(find src tests -name "*.java")
+javac -source 8 -target 8 -d out $(find src tests -name "*.java")
 java -cp out editor.Main --self-test
 java -cp out ci.SmokeTests
 ```
@@ -144,7 +144,7 @@ java -cp out ci.SmokeTests
 ```powershell
 New-Item -ItemType Directory -Force out | Out-Null
 $sourceFiles = Get-ChildItem -Path src, tests -Recurse -Filter *.java | Select-Object -ExpandProperty FullName
-javac --release 22 -d out $sourceFiles
+javac -source 8 -target 8 -d out $sourceFiles
 java -cp out editor.Main --self-test
 java -cp out ci.SmokeTests
 ```
@@ -209,13 +209,13 @@ Java highlighting is implemented with a styled document. When Java mode is enabl
 Use the same compile command from the installation section after making source changes:
 
 ```sh
-javac --release 22 -d out $(find src -name "*.java")
+javac -source 8 -target 8 -d out $(find src -name "*.java")
 ```
 
 For a broader local check, compile the source and tests together and run both smoke checks:
 
 ```sh
-javac --release 22 -d out $(find src tests -name "*.java")
+javac -source 8 -target 8 -d out $(find src tests -name "*.java")
 java -cp out editor.Main --self-test
 java -cp out ci.SmokeTests
 ```
@@ -224,7 +224,7 @@ On Windows PowerShell:
 
 ```powershell
 $sourceFiles = Get-ChildItem -Path src, tests -Recurse -Filter *.java | Select-Object -ExpandProperty FullName
-javac --release 22 -d out $sourceFiles
+javac -source 8 -target 8 -d out $sourceFiles
 java -cp out editor.Main --self-test
 java -cp out ci.SmokeTests
 ```
@@ -240,7 +240,7 @@ Development notes:
 - Keep source files under `src`.
 - Keep test-only checks under `tests`.
 - Do not commit compiled `.class` files or generated `out` / `build` directories.
-- Use Java 22-compatible APIs when editing Swing text components.
+- Keep the app Java 8-compatible so the release JAR works with older desktop Java installs.
 - Keep user settings outside the source tree.
 
 ## Releases
@@ -283,7 +283,11 @@ tests/
 
 ### `javac: invalid flag: --release`
 
-Your terminal is probably using an old JDK. Install Java 22 or newer and update `PATH` so `javac -version` reports a modern version.
+Leaf no longer uses `--release` in the documented build commands. Use the current README commands, or make sure `javac -version` reports Java 8 or newer.
+
+### `A Java Exception Has Occurred`
+
+Your computer may be opening the JAR with an older Java runtime than the one you use in the terminal. The release JAR is built for Java 8 or newer so it can be launched by common Windows `.jar` file associations.
 
 ### `Could not find or load main class editor.Main`
 
