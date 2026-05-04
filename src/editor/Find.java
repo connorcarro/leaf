@@ -1,16 +1,14 @@
 package editor;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.Toolkit;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.StyledDocument;
 
 public class Find {
 
@@ -107,7 +105,6 @@ public class Find {
         });
 
         jb_replace.addActionListener(event2 -> {
-            // TODO: Make replace feature
             replaceText();
         });
 
@@ -132,23 +129,39 @@ public class Find {
         findFrame.setVisible(true);
     }
     private void replaceText() {
-        try {
-            area.replaceSelection(jtf_replace.getText());
-            startIndex = index - jtf_find.getText().length() + jtf_replace.getText().length();
-            findNext();
-        } catch (NullPointerException ex) { /* NullPointerException thrown when there is no more of Find value in the JTextPane. */}
-        //area.replaceRange(jtf_replace.getText(), index, index + jtf_find.getText().length());
+        if (area.getSelectedText() == null) {
+            Toolkit.getDefaultToolkit().beep();
+            return;
+        }
+
+        area.replaceSelection(jtf_replace.getText());
+        startIndex = area.getCaretPosition();
+        findNext();
     }
 
     private void findNext() {
-        try {
-            String text = area.getText();
-            index = text.indexOf(jtf_find.getText(), startIndex);
-            area.setCaretPosition(index);
-            area.setSelectionStart(index);
-            area.setSelectionEnd(index + jtf_find.getText().length());
-            startIndex = index + jtf_find.getText().length();
-        } catch (IllegalArgumentException e) {}
+        String searchText = jtf_find.getText();
+        if (searchText == null || searchText.isEmpty()) {
+            Toolkit.getDefaultToolkit().beep();
+            return;
+        }
+
+        String text = area.getText();
+        index = text.indexOf(searchText, startIndex);
+        if (index < 0 && startIndex > 0) {
+            startIndex = 0;
+            index = text.indexOf(searchText, startIndex);
+        }
+
+        if (index < 0) {
+            Toolkit.getDefaultToolkit().beep();
+            return;
+        }
+
+        area.setCaretPosition(index);
+        area.setSelectionStart(index);
+        area.setSelectionEnd(index + searchText.length());
+        startIndex = index + searchText.length();
     }
 
     public void start() {
@@ -203,7 +216,6 @@ public class Find {
             length = 0;
             jtf_find.setText("");
         } catch (NullPointerException e) {
-            // TODO: handle exception
         }
     }
 

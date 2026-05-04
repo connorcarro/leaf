@@ -34,17 +34,35 @@ public final class SmokeTests {
         check("Month formatting", "January".equals(MonthConverter.capsFormat("JANUARY")));
 
         TimeFormat format = new TimeFormat();
-        check("Morning conversion", "1:5 AM".equals(format.convert(1, 5)));
-        check("Afternoon conversion", "01:5 PM".equals(format.convert(13, 5)));
+        check("Morning conversion", "1:05 AM".equals(format.convert(1, 5)));
+        check("Noon conversion", "12:05 PM".equals(format.convert(12, 5)));
+        check("Afternoon conversion", "1:05 PM".equals(format.convert(13, 5)));
         check("Short format is populated", !format.format("short").isEmpty());
         check("Long format is populated", !format.format("long").isEmpty());
     }
 
-    private static void testSettings() {
-        Settings settings = new Settings();
-        check("Font name loads", "Consolas".equals(settings.getFont("Font Name")));
-        check("Font style loads", "0".equals(settings.getFont("Font Style")));
-        check("Font size loads", "18".equals(settings.getFont("Font Size")));
+    private static void testSettings() throws IOException {
+        Path configDir = Files.createTempDirectory("text-editor-config");
+        String oldConfigDir = System.getProperty("texteditor.config.dir");
+        try {
+            System.setProperty("texteditor.config.dir", configDir.toString());
+            Settings settings = new Settings();
+            check("Default font name loads", "Consolas".equals(settings.getFont("Font Name")));
+            check("Default font style loads", "0".equals(settings.getFont("Font Style")));
+            check("Default font size loads", "18".equals(settings.getFont("Font Size")));
+
+            settings.saveFontSettings("Dialog", "Bold", 20);
+            check("Saved font name loads", "Dialog".equals(settings.getFont("Font Name")));
+            check("Saved font style loads", "1".equals(settings.getFont("Font Style")));
+            check("Saved font size loads", "20".equals(settings.getFont("Font Size")));
+        } finally {
+            if (oldConfigDir == null) {
+                System.clearProperty("texteditor.config.dir");
+            } else {
+                System.setProperty("texteditor.config.dir", oldConfigDir);
+            }
+            deleteRecursively(configDir);
+        }
     }
 
     private static void testTreeBuilder() throws IOException {

@@ -3,30 +3,24 @@ package converter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Locale;
 
 public class TimeFormat {
 
     public String convert(int h, int m) {
-        String result = "";
-        String suffix = "";
-        String prefix = "";
+        String suffix;
         if(h == 0) {
             h = 12;
             suffix = " AM";
-            result = prefix + h + ":" + m + suffix;
         } else if(h < 12) {
             suffix = " AM";
-            result = prefix + h + ":" + m + suffix;
         } else if (h == 12) {
             suffix = " PM";
-            result = prefix + h + ":" + m + suffix;
-        } else if (h > 12) {
-            prefix = "0";
+        } else {
             suffix = " PM";
             h = h - 12;
-            result = prefix + h + ":" + m + suffix;
         }
-        return result;
+        return String.format(Locale.ROOT, "%d:%02d%s", h, m, suffix);
     }
 
     private String timeFormat(DateFormat h, DateFormat m) {

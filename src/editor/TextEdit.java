@@ -22,7 +22,6 @@ import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.BevelBorder;
-import javax.swing.border.EmptyBorder;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.event.DocumentEvent;
@@ -39,7 +38,6 @@ import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.Document;
 import javax.swing.text.Element;
 import javax.swing.text.JTextComponent;
-import javax.swing.text.ParagraphView;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
@@ -52,21 +50,16 @@ import converter.TimeFormat;
 
 import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
-import java.awt.List;
-import java.awt.Rectangle;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.FontMetrics;
 import java.awt.Toolkit;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.AdjustmentEvent;
-import java.awt.event.AdjustmentListener;
 import java.awt.event.HierarchyBoundsListener;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.KeyEvent;
@@ -82,26 +75,14 @@ import treeNodes.FileNode;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Scanner;
-import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.Locale;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 public final class TextEdit extends JFrame implements ActionListener {
@@ -207,7 +188,6 @@ public final class TextEdit extends JFrame implements ActionListener {
                 //     System.out.println(matcher.group(1));
                 // }
                 if (wordR == after || String.valueOf(text.charAt(wordR)).matches("\\W")) {
-                    System.out.println(text.substring(wordL, wordR));
                     if (text.substring(wordL, wordR).matches("(\\W)*(class|private|public|protected|final|static|null|void|new|try|catch|if|while|else|int|boolean|String|float)")) {
                         setCharacterAttributes(wordL, wordR - wordL, purple, false);
                     // } else if(text.substring(wordL, wordR).matches("(\\W)*(if|while|else|try|catch|new|(|))")) {
@@ -956,8 +936,6 @@ public final class TextEdit extends JFrame implements ActionListener {
                 node = (DefaultMutableTreeNode) (node.getChildAt(index));
             } catch (NullPointerException exc) {}
 
-            System.out.println("User finished editing node.");
-            System.out.println("New Value: " + node.getUserObject());
         }
 
         @Override
@@ -976,7 +954,7 @@ public final class TextEdit extends JFrame implements ActionListener {
         }
     }
 
-    public void Save() {
+    public boolean Save() {
         try {
             File f = new File(saved_file);
             FileWriter out = new FileWriter(f);
@@ -984,6 +962,7 @@ public final class TextEdit extends JFrame implements ActionListener {
             out.close();
             saved = true;
             current_name = f.getName();
+            return true;
         } catch (FileNotFoundException ex) {
             Component f = null;
             JOptionPane.showMessageDialog(f, "File not found.");
@@ -993,31 +972,45 @@ public final class TextEdit extends JFrame implements ActionListener {
             JOptionPane.showMessageDialog(f, "Error.");
             saved = false;
         }
+        return false;
     }
 
-    public void SaveAs() {
+    public boolean SaveAs() {
         returnValue = jfc.showSaveDialog(null);
-            try {
-                File f = new File(jfc.getSelectedFile().getAbsolutePath());
-                saved_file = f.toString();
-                FileWriter out = new FileWriter(f);
-                out.write(area.getText());
-                out.close();
-                saved = true;
-                current_name = f.getName();
-            } catch (FileNotFoundException ex) {
-                Component f = null;
-                JOptionPane.showMessageDialog(f, "File not found.");
-                saved = false;
-            } catch (IOException ex) {
-                Component f = null;
-                JOptionPane.showMessageDialog(f, "Error.");
-                saved = false;
-            }
+        if (returnValue != JFileChooser.APPROVE_OPTION || jfc.getSelectedFile() == null) {
+            return false;
+        }
+
+        try {
+            File f = jfc.getSelectedFile();
+            saved_file = f.toString();
+            FileWriter out = new FileWriter(f);
+            out.write(area.getText());
+            out.close();
+            saved = true;
+            current_name = f.getName();
+            return true;
+        } catch (FileNotFoundException ex) {
+            Component f = null;
+            JOptionPane.showMessageDialog(f, "File not found.");
+            saved = false;
+        } catch (IOException ex) {
+            Component f = null;
+            JOptionPane.showMessageDialog(f, "Error.");
+            saved = false;
+        }
+        return false;
+    }
+
+    private boolean saveCurrentDocument() {
+        if (saved_file == null) {
+            return SaveAs();
+        }
+        return Save();
     }
 
     public void Request_Save(String option) {
-        if(option == "New") {
+        if("New".equals(option)) {
             // New
             Object[] options = { "Save", "Don't Save", "Cancel" };
 
@@ -1028,8 +1021,7 @@ public final class TextEdit extends JFrame implements ActionListener {
             options, options[1]);
             
             if(File_Not_Saved == JOptionPane.OK_OPTION) {
-                if(saved_file == null) { SaveAs(); }
-                else if(saved_file != null) { Save(); }
+                if(!saveCurrentDocument()) { return; }
                 area.setText("");
                 current_name = "Untitled";
                 saved_file = null;
@@ -1037,15 +1029,16 @@ public final class TextEdit extends JFrame implements ActionListener {
             }
 
             if(File_Not_Saved == JOptionPane.NO_OPTION) {
-                saved = false;
                 current_name = "Untitled";
                 area.setText("");
+                saved_file = null;
+                saved = true;
             }
 
             if(File_Not_Saved == JOptionPane.CLOSED_OPTION) {
 
             }
-        } else if(option == "Open") {
+        } else if("Open".equals(option)) {
             //Open
             Object[] options = { "Save", "Don't Save", "Cancel" };
 
@@ -1056,8 +1049,7 @@ public final class TextEdit extends JFrame implements ActionListener {
             options, options[1]);
             
             if(File_Not_Saved == JOptionPane.OK_OPTION) {
-                if(saved_file == null) { SaveAs(); }
-                else if(saved_file != null) { Save(); }
+                if(!saveCurrentDocument()) { return; }
                 saved = true;
             }
 
@@ -1068,7 +1060,7 @@ public final class TextEdit extends JFrame implements ActionListener {
             if(File_Not_Saved == JOptionPane.CLOSED_OPTION) {
                 saved = false;
             }
-        } else if(option == "Exit") {
+        } else if("Exit".equals(option)) {
             //Exit
             Object[] options = { "Save", "Don't Save", "Cancel" };
 
@@ -1079,8 +1071,7 @@ public final class TextEdit extends JFrame implements ActionListener {
             options, options[1]);
             
             if(File_Not_Saved == JOptionPane.OK_OPTION) {
-                if(saved_file == null) { SaveAs(); }
-                else if(saved_file != null) { Save(); }
+                if(!saveCurrentDocument()) { return; }
                 System.exit(0);
             }
 
@@ -1151,7 +1142,6 @@ public final class TextEdit extends JFrame implements ActionListener {
         String current_text;
         switch (ae) {
             case "Open":
-            System.out.println(true);
                 if(!saved) {
                     Request_Save(ae);
                 }
@@ -1166,8 +1156,7 @@ public final class TextEdit extends JFrame implements ActionListener {
                 break;
 
             case "Save":
-                if(saved_file == null) { SaveAs(); }
-                else if(saved_file != null) { Save(); }
+                saveCurrentDocument();
                 break;
             
             case "Save As":
@@ -1254,7 +1243,6 @@ public final class TextEdit extends JFrame implements ActionListener {
                 break;
 
             case "Word-Wrap":
-                // TODO: Fix code
                 // checked = !checked;
                 // area.setLineWrap(checked);
                 break;
@@ -1266,8 +1254,6 @@ public final class TextEdit extends JFrame implements ActionListener {
             case "Date and Time (short)": case "Date and Time (long)":
                 document = (StyledDocument)area.getStyledDocument();
                 f = new TimeFormat();
-                System.out.println(ae.substring(ae.indexOf("(")).replaceAll("[()]", ""));
-                System.out.println(f.format(ae.substring(ae.indexOf("(")).replaceAll("[()]", "")));
                 try {
                     document.insertString(area.getCaretPosition(), f.format(ae.substring(ae.indexOf("(")).replaceAll("[()]", "")), attrBlack);
                 } catch (BadLocationException e1) {
@@ -1278,7 +1264,6 @@ public final class TextEdit extends JFrame implements ActionListener {
                 break;
 
             case "Pattern":
-                // TODO: Make pattern window.
                 break;
 
             case "Show File Manager":
@@ -1342,14 +1327,9 @@ public final class TextEdit extends JFrame implements ActionListener {
                     }
 
                     private void saveFontSettings(String fontName, String fontStyle, int fontSize) {
-                        Path settingsPath = Path.of("src", "editor", "settings_data.txt");
+                        Settings settings = new Settings();
                         try {
-                            PrintWriter out = new PrintWriter(Files.newBufferedWriter(settingsPath));
-                            out.write(fontName + "," + fontStyle.toUpperCase() + "," + fontSize);
-                            out.close();
-                        } catch (FileNotFoundException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
+                            settings.saveFontSettings(fontName, fontStyle, fontSize);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }

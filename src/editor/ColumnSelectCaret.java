@@ -107,7 +107,7 @@ public class ColumnSelectCaret extends DefaultCaret {
 
         Position.Bias[] biasRet = new Position.Bias[1];
 
-        int pos = getComponent().getUI().viewToModel(getComponent(), pt, biasRet);
+        int pos = getComponent().getUI().viewToModel2D(getComponent(), pt, biasRet);
         
         if (biasRet[0] == null)
 
@@ -134,8 +134,8 @@ public class ColumnSelectCaret extends DefaultCaret {
         int lastX = end.x;
 
 
-        int pos1 = getComponent().getUI().viewToModel(getComponent(), new Point(firstX, y));
-        int pos2 = getComponent().getUI().viewToModel(getComponent(), new Point(lastX, y));
+        int pos1 = getComponent().getUI().viewToModel2D(getComponent(), new Point(firstX, y));
+        int pos2 = getComponent().getUI().viewToModel2D(getComponent(), new Point(lastX, y));
 
         try {
             getComponent().getHighlighter().addHighlight(pos1, pos2, ((DefaultHighlighter)getComponent().getHighlighter()).DefaultPainter);
@@ -146,8 +146,8 @@ public class ColumnSelectCaret extends DefaultCaret {
         y++;
 
         while(y<end.y) {
-            int pos1new = getComponent().getUI().viewToModel(getComponent(), new Point(firstX, y));
-            int pos2new = getComponent().getUI().viewToModel(getComponent(), new Point(lastX, y));
+            int pos1new = getComponent().getUI().viewToModel2D(getComponent(), new Point(firstX, y));
+            int pos2new = getComponent().getUI().viewToModel2D(getComponent(), new Point(lastX, y));
 
             if (pos1 != pos1new) {
                 pos1 = pos1new;
