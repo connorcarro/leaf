@@ -10,6 +10,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
 import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.Highlighter;
+import javax.swing.text.Position;
 import javax.swing.text.StyledDocument;
 
 public class ColumnSelectCaret extends DefaultCaret {
@@ -158,6 +159,7 @@ public class ColumnSelectCaret extends DefaultCaret {
     }
 
     private int viewToModel(Point point) {
-        return getComponent().getUI().viewToModel(getComponent(), point);
+        Position.Bias[] biasRet = new Position.Bias[1];
+        return getComponent().getUI().viewToModel2D(getComponent(), point, biasRet);
     }
 }

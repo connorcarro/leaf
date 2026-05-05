@@ -3,6 +3,9 @@
 out/
 build/
 
+# Local-only developer notes
+LOCAL_DEVELOPER_NOTES.md
+
 # Log file
 *.log
 

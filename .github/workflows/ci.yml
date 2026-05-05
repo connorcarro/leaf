@@ -26,7 +26,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '8'
+          java-version: '22'
 
       - name: Compile and run feature smoke tests
         shell: pwsh
@@ -38,7 +38,7 @@ jobs:
 
           New-Item -ItemType Directory -Force out | Out-Null
           $sourceFiles = Get-ChildItem -Path src, tests -Recurse -Filter *.java | Select-Object -ExpandProperty FullName
-          javac -source 8 -target 8 -Xlint:deprecation -d out $sourceFiles
+          javac --release 22 -Xlint:deprecation -d out $sourceFiles
           $configDir = Join-Path $env:RUNNER_TEMP "leaf-config"
           $env:JAVA_TOOL_OPTIONS = "$env:JAVA_TOOL_OPTIONS -Dleaf.config.dir=$configDir"
           java -cp out editor.Main --self-test
@@ -56,7 +56,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '8'
+          java-version: '22'
 
       - name: Install virtual display
         run: |
@@ -66,7 +66,7 @@ jobs:
       - name: Compile app
         run: |
           mkdir -p out
-          javac -source 8 -target 8 -Xlint:deprecation -d out $(find src -name "*.java")
+          javac --release 22 -Xlint:deprecation -d out $(find src -name "*.java")
 
       - name: Start app under virtual display
         env:

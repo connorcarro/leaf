@@ -22,7 +22,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '8'
+          java-version: '22'
 
       - name: Compile, test, and package
         shell: pwsh
@@ -35,7 +35,7 @@ jobs:
           New-Item -ItemType Directory -Force build/check-classes, build/classes | Out-Null
 
           $checkSources = Get-ChildItem -Path src, tests -Recurse -Filter *.java | Select-Object -ExpandProperty FullName
-          javac -source 8 -target 8 -Xlint:deprecation -d build/check-classes $checkSources
+          javac --release 22 -Xlint:deprecation -d build/check-classes $checkSources
 
           $configDir = Join-Path $env:RUNNER_TEMP "leaf-config"
           $env:JAVA_TOOL_OPTIONS = "$env:JAVA_TOOL_OPTIONS -Dleaf.config.dir=$configDir"
@@ -43,7 +43,7 @@ jobs:
           java -cp build/check-classes ci.SmokeTests
 
           $appSources = Get-ChildItem -Path src -Recurse -Filter *.java | Select-Object -ExpandProperty FullName
-          javac -source 8 -target 8 -Xlint:deprecation -d build/classes $appSources
+          javac --release 22 -Xlint:deprecation -d build/classes $appSources
 
           jar --create --file leaf.jar --main-class editor.Main -C build/classes .
           java -jar leaf.jar --self-test
