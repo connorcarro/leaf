@@ -74,15 +74,17 @@ Both commands should resolve to Java 22 or newer. If your system has multiple Ja
 
 ## Installation
 
-The easiest way to run Leaf is to download the release JAR. You can also clone the repository, compile the Java files into an `out` directory, then launch the main class.
+The easiest way to run Leaf is to download the release JAR and launch it from a terminal. You can also clone the repository, compile the Java files into an `out` directory, then launch the main class.
 
 ### Option 1: Run The Release JAR
 
-Download `leaf.jar` from the [latest GitHub release](https://github.com/connorcarro/leaf/releases/latest), then run:
+Download `leaf.jar` from the [latest GitHub release](https://github.com/connorcarro/leaf/releases/latest), open a terminal in the download folder, then run:
 
 ```sh
 java -jar leaf.jar
 ```
+
+Double-clicking the JAR may work if your operating system already opens `.jar` files with Java 22 or newer. The terminal command above is the supported launch path.
 
 ### Option 2: Build From Source
 
@@ -151,7 +153,7 @@ java -cp out ci.SmokeTests
 
 ## Usage
 
-Launch Leaf with `java -cp out editor.Main`. The editor opens with an untitled document.
+Launch the release JAR with `java -jar leaf.jar`, or launch a source build with `java -cp out editor.Main`. The editor opens with an untitled document.
 
 Use the File menu to create, open, save, save as, or exit. When a document has unsaved changes, Leaf marks the window title and asks whether to save before actions that would replace or close the current document.
 
@@ -287,7 +289,13 @@ Your terminal is using an old JDK. Install JDK 22 or newer and update `PATH` so 
 
 ### `A Java Exception Has Occurred`
 
-Your computer may be opening the JAR with an older Java runtime than the one you use in the terminal. Install Java 22 or newer and update the Windows `.jar` file association if double-click still uses an older Java install.
+Your computer may be opening the JAR with an older Java runtime than the one you use in the terminal. Run `java -version` and make sure it reports Java 22 or newer, then launch from a terminal:
+
+```sh
+java -jar leaf.jar
+```
+
+If the terminal command works but double-clicking does not, your `.jar` file association is using an older Java install. Update the operating system file association to Java 22 or newer, or keep launching from the terminal.
 
 ### `Could not find or load main class editor.Main`
 
