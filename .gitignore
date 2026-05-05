@@ -5,6 +5,7 @@ build/
 
 # Local-only developer notes
 LOCAL_DEVELOPER_NOTES.md
+RUN_LEAF_WSL.bat
 
 # Log file
 *.log
